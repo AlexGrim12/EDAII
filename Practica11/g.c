@@ -1,28 +1,28 @@
 #include <stdio.h>
 #include <omp.h>
 
-int main()
+int main(int argc, char argv[])
 {
-    long long n_values[] = {10000, 100000, 1000000, 10000000};  // Puedes agregar más valores de n si lo deseas
+    long long n = 1000000000;
+    double h;
+    double empezar, terminar;
+    double x, pi = 0.0;
+    int i;
 
-    for (int j = 0; j < sizeof(n_values) / sizeof(n_values[0]); j++)
+    empezar = omp_get_wtime();
+    h = 1.0 / (double)n;
+
+    #pragma omp parallel for private(x) reduction(+:pi)
+    for (i = 0; i < n; i++)
     {
-        long long n = n_values[j];
-        double h = 1.0 / (double)n;
-        double x, pi = 0.0;
-
-        double start = omp_get_wtime();
-
-        for (int i = 0; i < n; i++)
-        {
-            x = (i + 0.5) * h;
-            pi += 4.0 / (1.0 + x * x);
-        }
-
-        double end = omp_get_wtime();
-
-        printf("Serie - N = %lld, PI = %15.12f, Tiempo = %15.12f segundos\n", n, h * pi, end - start);
+        x = (i + 0.5) * h;
+        pi += 4.0 / (1.0 + x * x);
     }
+
+    terminar = omp_get_wtime();
+
+    printf("El valor de PI es %15.12f\n", h * pi);
+    printf("El tiempo de ejecucion es %15.12f\n", terminar - empezar);
 
     return 0;
 }
